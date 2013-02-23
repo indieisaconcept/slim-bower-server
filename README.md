@@ -46,7 +46,7 @@ Ensure you update your .bowerrc either at a global or project level to use your 
 ```
 {
 	...
-	endpoint: 'http://some.host.com.au'
+	"endpoint": 'http://some.host.com.au'
 	…
 }
 ```
