@@ -1,8 +1,28 @@
 <?php
 
+// isValid
+// Is the data valid for database insertion?
+function isValid ($attributes = null, $keys = null) {
+
+    $valid = FALSE;
+
+    if (isset($attributes)) {
+
+        $valid = TRUE;
+
+        foreach ($attributes as $key => $attribute) {
+            echo $key;
+        }
+
+    }
+
+    return $valid;
+
+}
+
 // process
 // Porcess a phpactiverecord recordset
-$process = function ($packages) {
+function process ($packages) {
 
     // attributes
     // Return require attributes from record
@@ -17,7 +37,7 @@ $process = function ($packages) {
 
     $results = null;
 
-    if (isset($packages)) { 
+    if (isset($packages) && !empty($packages)) { 
 
         $results = array();
 
@@ -49,23 +69,27 @@ $process = function ($packages) {
 //
 // < 200
 
-$app->post('/packages', function () use ($app) {
+function routePackagesPost () {
+
+    $app = Slim::getInstance();
 
     $requestBody = $app->request()->getBody();
-    $attributes = json_decode($requestBody, true); 
-
-    $package = new Package(array(
-        'name' => $attributes['name'],
-        'url' => $attributes['url']
-    ));
+    $attributes = json_decode($requestBody, true);
     
-    if ($package->is_valid()) {
+    if (isValid($attributes)) {
+
+        $package = ORM::forTable('package')->create();
+        $package->name = $attributes['name'];
+        $package->url = $attributes['url'];
         $package->save();
+
     } else {
         $app->response()->status(400);
     }
 
-});
+}
+
+$app->post('/packages', 'routePackagesPost');
 
 // GET /packages
 // < 200
@@ -76,16 +100,21 @@ $app->post('/packages', function () use ($app) {
 //          url: 'git-url'
 //      }]
 
-$app->get('/packages', function () use ($app, $process) {
+function routePackagesGet () {
 
-    $result = $process(Package::find('all', array('order' => 'name DESC')));
+    $app = Slim::getInstance();    
+
+    $packages = ORM::for_table('packages')->order_by_desc('name')->find_many();
+    $result = process($packages);
 
     if (isset($result)) {
         $app->response()->header('Content-Type', 'application/json');
         echo $result;
     }
 
-});
+}
+
+$app->get('/packages', 'routePackagesGet');
 
 // GET /packages/{parameters}
 // < 200
@@ -95,15 +124,21 @@ $app->get('/packages', function () use ($app, $process) {
 //          name: 'package-name',
 //          url: 'git-url'
 //      }
+//
 
-$app->get('/packages/:name', function ($name) use ($app, $process) {
+function routePackagesName ($name) {
 
-    $package = Package::find(array('conditions' => array('name = ?', $name)));
-    $result = $process($package);
+    $app = Slim::getInstance();    
+
+    $package = ORM::for_table('packages')->where('name', $name)->find_one();
+
+    $result = process($package);
 
     if (isset($result)) {
 
-        $package->update_attributes(array('hits' => $package->hits + 1));
+        $package->set('hits', $package->hits + 1);
+        $package->save();
+
         $app->response()->header('Content-Type', 'application/json');
         echo $result;
 
@@ -111,7 +146,9 @@ $app->get('/packages/:name', function ($name) use ($app, $process) {
         $app->response()->status(404);
     }
 
-});
+}
+
+$app->get('/packages/:name', 'routePackagesName');
 
 // GET /packages/search/{parameters}
 // < 200
@@ -121,16 +158,22 @@ $app->get('/packages/:name', function ($name) use ($app, $process) {
 //          url: 'git-url'
 //      }]
 
-$app->get('/packages/search/:name', function ($name) use ($app, $process) {
+function routePackagesSearch ($name) {
 
-    $packages = Package::find('all', array('conditions' => array('name LIKE "%' . $name . '%"'), 'order' => 'name DESC'));
-    $result = $process($packages);
+    $app = Slim::getInstance();    
+
+    $packages = ORM::for_table('packages')->where_like('name', '%' . $name . '%')->order_by_desc('name')->find_many();
+    $result = process($packages);
 
     if (isset($result)) {
         $app->response()->header('Content-Type', 'application/json');
         echo $result;
+    } else {
+        $app->response()->status(404);
     }
 
-});
+}
+
+$app->get('/packages/search/:name', 'routePackagesSearch');
 
 ?>

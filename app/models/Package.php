@@ -1,5 +1,10 @@
 <?php
 
+class Package extends Model {
+}
+
+/*
+
 class Package extends ActiveRecord\Model {
 
     static $validates_uniqueness_of = array(
@@ -19,5 +24,7 @@ class Package extends ActiveRecord\Model {
     );
 
 }
+
+*/
 
 ?>

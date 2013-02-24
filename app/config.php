@@ -5,13 +5,11 @@
 $config = array(
 
     'database' => array(
-
-        'models' => '../app/models',
-
-        'connection' => array(
-            'development' => 'sqlite://../app/data/bower.db.sqlite'
-        )
-
+        'connection' => 'sqlite://' . dirname(__FILE__) . '/data/bower.db.sqlite'
     )
 
 );
+
+require_once dirname(__FILE__) . '/models/Package.php';
+
+?>
