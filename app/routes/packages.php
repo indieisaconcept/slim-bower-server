@@ -2,16 +2,49 @@
 
 // isValid
 // Is the data valid for database insertion?
-function isValid ($attributes = null, $keys = null) {
+function isValid ($keys = null, $attributes = null) {
+
+    function validate ($keys = null, $attributes = null) {
+
+        function validateURL ($url) {
+            return preg_match('/^git\:\/\//', $url);
+        }
+
+        $valid = FALSE;
+
+        if (isset($keys) && isset($attributes)) {
+
+            $valid = TRUE;
+
+            foreach ($keys as $key) {
+                
+                $func = 'validate' . strtoupper($key);
+                $valid = array_key_exists($key, $attributes) && !empty($attributes[$key]);
+
+                if (function_exists($func)) {
+                    $valid = $func($attributes[$key]);
+                }
+
+                if (!$valid) {
+                    break;
+                }
+
+            }
+
+        }
+
+        return $valid;
+
+    }    
 
     $valid = FALSE;
 
-    if (isset($attributes)) {
+    if (validate($keys, $attributes)) {
 
-        $valid = TRUE;
+        $count = ORM::for_table('packages')->where_raw('(`name` = ? OR `url` = ?)', array($attributes['name'], $attributes['url']))->count();
 
-        foreach ($attributes as $key => $attribute) {
-            echo $key;
+        if ($count == 0) {
+            $valid = TRUE;
         }
 
     }
@@ -76,11 +109,15 @@ function routePackagesPost () {
     $requestBody = $app->request()->getBody();
     $attributes = json_decode($requestBody, true);
     
-    if (isValid($attributes)) {
+    if (isValid(array('url', 'name'), $attributes)) {
 
-        $package = ORM::forTable('package')->create();
+        $timestamp = date('Y-m-d H:i:s');
+
+        $package = ORM::for_table('packages')->create();
         $package->name = $attributes['name'];
         $package->url = $attributes['url'];
+        $package->created_at = $timestamp;
+        $package->updated_at = $timestamp;        
         $package->save();
 
     } else {
