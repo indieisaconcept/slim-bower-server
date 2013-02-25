@@ -81,6 +81,7 @@ function process ($packages) {
             }
 
         } else {
+
             $results = attributes($packages);
         }
 
@@ -173,7 +174,10 @@ function routePackagesName ($name) {
 
     if (isset($result)) {
 
+        $timestamp = date('Y-m-d H:i:s');
+
         $package->set('hits', $package->hits + 1);
+        $package->set('updated_at', $timestamp);
         $package->save();
 
         $app->response()->header('Content-Type', 'application/json');

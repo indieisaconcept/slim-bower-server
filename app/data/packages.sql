@@ -1,14 +1,13 @@
-CREATE TABLE "packages" (
+CREATE TABLE IF NOT EXISTS "packages" (
 
-    "id"            INTEGER PRIMARY KEY  NOT NULL  check(typeof("id") = 'integer'),
-    "name"          VARCHAR NOT NULL  UNIQUE , 
-    "url"           VARCHAR NOT NULL  UNIQUE ,
-    "hits"          INTEGER NOT NULL  DEFAULT 0,
-    "created_at"    DATETIME NOT NULL, 
-    "updated_at"    DATETIME NOT NULL
+    "id"            INTEGER PRIMARY KEY,
+    "name"          VARCHAR NOT NULL UNIQUE, 
+    "url"           VARCHAR NOT NULL UNIQUE,
+    "hits"          INTEGER NOT NULL DEFAULT 0,
+    "created_at"    DATETIME NOT NULL DEFAULT (DATETIME("now", "localtime")),
+    "updated_at"    DATETIME NOT NULL DEFAULT (DATETIME("now", "localtime"))
     
 );
 
-CREATE INDEX "packages_name" ON "packages" ("name");
-
-# INSERT INTO "packages" VALUES(1,'jquery','git://github.com/jquery/jquery.git',0,'2013-02-23 02:25:47 EST','2013-02-23 03:28:30 EST');
+CREATE INDEX IF NOT EXISTS "packages_name" ON "packages" ("name");
+INSERT OR IGNORE INTO "packages" (name, url) VALUES ("jquery", "git://github.com/jquery/jquery.git");
