@@ -51,8 +51,7 @@ $process = function ($packages) {
 
 $app->post('/packages', function () use ($app) {
 
-    $requestBody = $app->request()->getBody();
-    $attributes = json_decode($requestBody, true); 
+    $attributes = $app->request()->post();
 
     $package = new Package(array(
         'name' => $attributes['name'],
