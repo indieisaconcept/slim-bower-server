@@ -39,6 +39,12 @@ Dependencies are managed using Composer.
 > php composer.phar install
 ```
 
+#### Create Database
+
+```
+> cat myproject/app/datapackages.sql | sqlite3 myproject/app/databower.db.sqlite
+```
+
 ### Usage
 
 Ensure you update your .bowerrc either at a global or project level to use your custom server endpoint.
