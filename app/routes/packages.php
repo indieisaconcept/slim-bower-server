@@ -1,7 +1,7 @@
 <?php
 
 // process
-// Porcess a phpactiverecord recordset
+// Process a phpactiverecord recordset
 $process = function ($packages) {
 
     // attributes
