@@ -61,6 +61,7 @@ $app->post('/packages', function () use ($app) {
     
     if ($package->is_valid()) {
         $package->save();
+        $app->response()->status(201);
     } else {
         $app->response()->status(400);
     }
